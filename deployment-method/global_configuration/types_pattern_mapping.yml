@@ -1,0 +1,80 @@
+types:
+  - pattern: .*\.LOAD$
+    dataset: "{{ hlq }}.LOAD"
+    dataset_backup: "{{ hlq }}.BACK.LOAD"
+    spec: "{{ common_pds_load_spec }}"
+    is_load: True
+    use_native_copy: True
+  - pattern: .*\.CICSLOAD$
+    dataset: "{{ hlq }}.LOAD"
+    dataset_backup: "{{ hlq }}.BACK.LOAD"
+    spec: "{{ common_pds_load_spec }}"
+    is_load: True
+    use_native_copy: True
+    cics_systems:
+      - "{{ cics_sys_def }}"
+  - pattern: .*\.MAPLOAD$
+    dataset: "{{ hlq }}.LOAD"
+    dataset_backup: "{{ hlq }}.BACK.LOAD"
+    spec: "{{ common_pds_load_spec }}"
+    is_load: True
+    use_native_copy: True
+    cics_systems:
+      - "{{ cics_sys_def }}"
+  - pattern: .*.DBRM$
+    dataset: "{{ hlq }}.DBRM"
+    dataset_backup: "{{ hlq }}.BACK.DBRM"
+    spec: "{{ common_pds_binary_spec }}"
+    is_binary: True
+    use_native_copy: True
+    db2_systems:
+      - "{{ db2_sys_def }}"
+  - pattern: .*.JCL$
+    dataset: "{{ hlq }}.JCL"
+    dataset_backup: "{{ hlq }}.BACK.JCL"
+    spec: "{{ common_pds_txt_spec }}"
+    use_native_copy: True
+    encoding: # no code page conversion necessary
+      from: IBM-1047
+      to: IBM-1047
+    text_subs: # Token replacement feature
+      - pattern: "@PGMLIB"
+        replace: "{{ hlq }}"
+  - pattern: .*.BIN$
+    directory: "{{ uss_root }}/bin/"
+    directory_backup: "{{ uss_root }}/bin/back/"
+    dest_mode: 0777
+    artifact_mode: 0755
+    is_binary: True
+  - pattern: .*.SH$
+    directory: "{{ uss_root }}/sh/"
+    directory_backup: "{{ uss_root }}/sh/back/"
+    dest_mode: 0777
+    artifact_mode: 0755
+  - pattern: .*.TXT$
+    directory: "{{ uss_root }}/txt/"
+    directory_backup: "{{ uss_root }}/txt/back/"
+    encoding:
+      from: UTF-8
+      to: IBM-1047
+    dest_mode: 0777
+    artifact_mode: 0755
+  - pattern: .*.SEQ$
+    dataset_prefix: "{{ hlq }}.SEQ"
+    dataset_backup_prefix: "{{ hlq }}.BACK.SEQ"
+    encoding:
+      from: UTF-8
+      to: IBM-037
+    is_binary: False
+    use_native_copy: True
+    is_sequential: True
+    spec: "{{seq_spec}}"
+  - pattern: .*.SEQA$
+    dataset_prefix: "{{ hlq }}.SEQ"
+    dataset_backup_prefix: "{{ hlq }}.BACK.SEQ"
+    encoding:
+      from: UTF-8
+      to: IBM-037
+    is_binary: False
+    is_sequential: True
+    spec: "{{seq_spec_a}}"
