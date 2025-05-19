@@ -1,5 +1,0 @@
-  jcl_expert_verification:
-   src: "{{ config_dir }}/deployment-method/templates/jcl_expert_validation.jcl.j2"
-   use_template: True
-   max_rc: 4
-   dest: "/tmp/jcl_expert_validation.jcl"

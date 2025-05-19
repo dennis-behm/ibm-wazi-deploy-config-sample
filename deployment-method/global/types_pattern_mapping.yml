@@ -1,24 +1,38 @@
+# Notes:
+# 
+# Upload strategy:
+#  Default: Upload files is via ZOAU python APIs by. native_copy only on selected operations where datasets
+#  without any shared allocations can be guaranteed (probably JCL).
+#
+# Concurrent access check:
+#  Default: Check for concurrent allocations on target datasets (not applicable when using native_copy). Deployment fails on concurrent access.
+#  Exceptions: Deploying into Online regions where concurrent allocations are expected
+# 
+
 types:
   - pattern: .*\.LOAD$
     dataset: "{{ hlq }}.LOAD"
     dataset_backup: "{{ hlq }}.BACK.LOAD"
     spec: "{{ common_pds_load_spec }}"
-    is_load: True
-    use_native_copy: True
+    is_load: true
+    force_lock: true
+    use_native_copy: false
   - pattern: .*\.CICSLOAD$
     dataset: "{{ hlq }}.LOAD"
     dataset_backup: "{{ hlq }}.BACK.LOAD"
     spec: "{{ common_pds_load_spec }}"
-    is_load: True
-    use_native_copy: True
+    is_load: true
+    force_lock: true
+    use_native_copy: false
     cics_systems:
       - "{{ cics_sys_def }}"
   - pattern: .*\.MAPLOAD$
     dataset: "{{ hlq }}.LOAD"
     dataset_backup: "{{ hlq }}.BACK.LOAD"
     spec: "{{ common_pds_load_spec }}"
-    is_load: True
-    use_native_copy: True
+    is_load: true
+    force_lock: true
+    use_native_copy: false
     cics_systems:
       - "{{ cics_sys_def }}"
   - pattern: .*.DBRM$
@@ -26,20 +40,20 @@ types:
     dataset_backup: "{{ hlq }}.BACK.DBRM"
     spec: "{{ common_pds_binary_spec }}"
     is_binary: True
-    use_native_copy: True
+    force_lock: false
+    use_native_copy: false
     db2_systems:
       - "{{ db2_sys_def }}"
   - pattern: .*.JCL$
     dataset: "{{ hlq }}.JCL"
     dataset_backup: "{{ hlq }}.BACK.JCL"
     spec: "{{ common_pds_txt_spec }}"
-    use_native_copy: True
+    force_lock: false
+    use_native_copy: true
     encoding: # no code page conversion necessary
       from: IBM-1047
       to: IBM-1047
-    text_subs: # Token replacement feature
-      - pattern: "@PGMLIB"
-        replace: "{{ hlq }}"
+    text_subs: "{{ app_jcl_text_subs_patterns if app_jcl_text_subs_patterns is defined else [] }}"
   - pattern: .*.BIN$
     directory: "{{ uss_root }}/bin/"
     directory_backup: "{{ uss_root }}/bin/back/"
@@ -66,7 +80,8 @@ types:
       from: UTF-8
       to: IBM-037
     is_binary: False
-    use_native_copy: True
+    force_lock: false
+    use_native_copy: false
     is_sequential: True
     spec: "{{seq_spec}}"
   - pattern: .*.SEQA$

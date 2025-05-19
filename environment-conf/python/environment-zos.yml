@@ -15,16 +15,10 @@ metadata:
 
 include_common_vars:
   files_list:
-    - "{{ config_dir }}/deployment-method/global_configuration/jcl_verification.yml"
-    - "{{ config_dir }}/deployment-method/global_configuration/pds_specification.yml"
-    - "{{ config_dir }}/deployment-method/global_configuration/types_pattern_mapping.yml"
+    - "/var/WaziDeploy/wazi-deploy-samples-0.10.0/wazi-deploy-sample/plum-samples/external-repos/deployment-method/global/jcl_verification.yml"
+    - "/var/WaziDeploy/wazi-deploy-samples-0.10.0/wazi-deploy-sample/plum-samples/external-repos/deployment-method/global/pds_specification.yml"
+    - "/var/WaziDeploy/wazi-deploy-samples-0.10.0/wazi-deploy-sample/plum-samples/external-repos/deployment-method/global/types_pattern_mapping.yml"
   files_must_exist: True
-
-# input variables
-hlq: "{{ extra_vars.hlq if extra_vars.hlq is defined else 'WDEPLOY.CBSA.QA' }}"
-uss_root: "{{ extra_vars.uss_root if extra_vars.uss_root is defined else '/tmp/wazi-deploy' }}"
-config_dir: "{{ extra_vars.config_dir if extra_vars.config_dir is defined else '/var/WaziDeploy/wazi-deploy-samples-0.10.0/wazi-deploy-sample/plum-samples/external-repos' }}"
-
 
 default_cics_cmci_action: "NEWCOPY"
 cics_sys_def:

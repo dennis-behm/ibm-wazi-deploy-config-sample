@@ -10,18 +10,33 @@ metadata:
     This deployment method can be use for the deployment of an CICS application.
   annotations:
     deployVersion: "1.0.0"
-
+    
 activities:
 
   - name: CONFIG
     description: |
       Load the generic Wazi Deploy Configuration variables
+      Specific for the Python implementation
     actions:
-    - name: READ COMMON CONFIGURATION
-      short_name: COMMON_CONFIG
+    - name: READ CONFIGURATION
+      short_name: CONFIG
       steps:
-      - name: INCLUDE COMMON VARIABLES
-        short_name: INCLUDE_VARS
+      - name: INCLUDE ENVIRONMENT VARIABLES
+        short_name: INCLUDE_ENV_VARS
+        properties:
+        - key: template
+          value: include_vars
+        - key: var_include_vars
+          value: include_environment_vars
+      - name: INCLUDE MIDDLEWARE VARIABLES
+        short_name: INCLUDE_MIDDLEWARE_VARS
+        properties:
+        - key: template
+          value: include_vars
+        - key: var_include_vars
+          value: include_middleware_vars
+      - name: INCLUDE GLOBAL VARIABLES
+        short_name: INCLUDE_GLOBAL_VARS
         properties:
         - key: template
           value: include_vars
@@ -30,7 +45,7 @@ activities:
           
   - name: PACKAGE
     description: |
-      This activity handle the package
+      This activity expands the package into the working directory
     actions:
         - name: PACKAGE
           steps:
@@ -40,13 +55,12 @@ activities:
     
   - name: DEPLOY_MODULES
     description: |
-      This activity is dedicated to the deployment of the artifacts into the PDS 
+      This activity is deploys artifacts into the target PDS libraries
     actions:
         - name: ADD
           description: |
             This action is applicable when we add new artifacts.
           states:
-             - NEW
              - UNDEFINED
           properties:
           - key: "my_action_prop"
@@ -55,26 +69,6 @@ activities:
           - name: MEMBER_COPY
             description: |
               This step do the copy of artifacts into PDSs
-        - name: UPDATE
-          description: |
-            This action is applicable when we update artifacts
-          states:
-             - MODIFIED
-          properties:
-          - key: "my_action_prop"
-            value: "my_value"
-          steps:
-          - name: MEMBER_VALIDATE
-            description: |
-              This step check the checksum of the already installed modules
-            plan_tags:
-             - never
-          - name: MEMBER_ARCHIVE
-            description: |
-              This step do the backup of already installed artifacts into a backup PDS(s)
-          - name: MEMBER_COPY
-            description: |
-              This step do the copy of artifacts into targeted PDS(s)
     types:
       - name: 'DBRM'
       - name: 'LOAD'
@@ -82,16 +76,14 @@ activities:
       - name: 'MAPLOAD'
       - name: 'JCL'
     is_artifact: True
-    properties:
-      - key: "my_activity_prop"
-        value: "my_value"
     tags:
     - deploy_modules
 
   - name: VERIFICATION
     description: |
-      This action block will verify that the deployed JCLs are correct.
-      It uses the JCL Expert to scan and validate them.
+      This action block verifies that the deployed JCLs are correct.
+      It uses the JCL Expert to scan and validate them. This showcases 
+      how the conditional deployment 'loop' keyword can be used.
     types: 
      - name: "JCL"
     actions:
@@ -114,42 +106,6 @@ activities:
             - key: var_job_submit
               value: jcl_expert_verification
 
-#  - name: CUST_JCL
-#    description: |
-#      This will invoke the custom updates
-#    actions:
-#       - name: JCL
-#         states:
-#            - UNDEFINED
-#         steps:
-#         - name: CUSTOMIZATION
-#           is_artifact: True
-#           types: 
-#            - name: "JCL"
-#           #when: wd_query[[ length ( current_plan_step.artifacts) ]] != 0
-#           properties:
-#           - key: template
-#             value: shell_command
-#           - key: var_shell_command
-#             value: jcl_shell_cmd
-#       - name: PROCS
-#         states:
-#            - UNDEFINED
-#         steps:
-#         - name: CUSTOMIZATION
-#           is_artifact: True
-#           types:
-#            - name: 'PROCS'
-#           #when: wd_query[[ length ( current_plan_step.artifacts) ]] != 0
-#           properties:
-#           - key: template
-#             value: shell_command
-#           - key: var_shell_command
-#             value: procs_shell_cmd
-#           #when#:
-#           #  - wd_query [['evidences.activities[?name=='PACKAGE'] | [0].actions[?name=='PACKAGE'] | [0].steps[?name=='PACKAGE'] | [0].step_result.status']] == 'Ok'
-#           #when: [[ 'deployment_plan.activities[] | select(.name == "DEPLOY_MODULES") | .actions[] | select(.name=="ADD") | .steps[] | select(.name=="MEMBER_COPY") | .artifacts[] | contains({ "properties": [ { "key": "type", "value": "LOAD" } ] } )' ]] == 'true'
-
   - name: DB2
     description: |
       This activity is dedicated to DBRM bind modules
@@ -158,8 +114,6 @@ activities:
           description: |
             This action is applicable when we update a DBRM modules
           states:
-             - NEW
-             - MODIFIED
              - UNDEFINED
           steps:
           - name: DB2_BIND_PACKAGE
@@ -172,59 +126,19 @@ activities:
         
   - name: CICS
     description: |
-       This activity is dedicated to CICS load modules
+       This activity is dedicated to CICS artifacts
     actions:
-        - name: ADD
-          states:
-             - NEW
-          steps:
-          - name: PROG_CREATE
-            properties:
-            - key: "template"
-              value: "cics_cmci_prog_create"
         - name: UPDATE
           states:
-             - MODIFIED
              - UNDEFINED
           steps:
           - name: PROG_UPDATE
             properties:
             - key: "template"
               value: "cics_cmci_prog_update"
-        - name: DELETE
-          states:
-             - DELETED
-          steps:
-          - name: PROG_DELETE
-            properties:
-            - key: "template"
-              value: "cics_cmci_prog_delete"
     types:
       - name: 'CICSLOAD'
       - name: 'MAPLOAD'
     is_artifact: True
     tags:
-    - cics
-    
-  - name: DELETE_MODULES
-    description: |
-      This activity is dedicated to the deletion of the artifacts from the PDSs 
-    actions:
-        - name: DELETE
-          description: |
-            This action is applicable when we deleting artifacts
-          states:
-             - DELETED
-          steps:
-          - name: MEMBER_DELETE
-            description: |
-              This step do the deletion of artifacts 
-    types:
-      - name: 'DBRM'
-      - name: 'LOAD'
-      - name: 'CICSLOAD'
-      - name: 'MAPLOAD'
-      - name: 'JCL'
-    is_artifact: True
-    tags:
-    - delete_modules    
+    - cics  
