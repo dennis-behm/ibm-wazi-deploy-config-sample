@@ -1,0 +1,5 @@
+  jcl_expert_verification:
+   src: "/var/WaziDeploy/wazi-deploy-samples-0.10.0/wazi-deploy-sample/plum-samples/external-repos/deployment-method/templates/jcl_expert_validation.jcl.j2"
+   use_template: True
+   max_rc: 4
+   dest: "/tmp/jcl_expert_validation.jcl"

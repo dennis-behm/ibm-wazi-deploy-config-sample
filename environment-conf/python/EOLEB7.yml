@@ -1,0 +1,58 @@
+#*******************************************************************************
+# Licensed Materials - Property of IBM
+# (c) Copyright IBM Corp. 2023. All Rights Reserved.
+#
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# Contract with IBM Corp.
+#*******************************************************************************
+---
+apiVersion: deploy.ibm.com/v1
+kind: Environment
+metadata:
+  name: "EOLEB7"
+  version: 1.0.0
+
+include_common_vars:
+  files_list:
+    - "/var/WaziDeploy/wazi-deploy-samples-0.10.0/wazi-deploy-sample/plum-samples/external-repos/deployment-method/global/jcl_verification.yml"
+    - "/var/WaziDeploy/wazi-deploy-samples-0.10.0/wazi-deploy-sample/plum-samples/external-repos/deployment-method/global/pds_specification.yml"
+    - "/var/WaziDeploy/wazi-deploy-samples-0.10.0/wazi-deploy-sample/plum-samples/external-repos/deployment-method/global/types_pattern_mapping.yml"
+  files_must_exist: True
+
+default_cics_cmci_action: "NEWCOPY"
+cics_sys_def:
+  cicsplex: "CICS02"
+  cmci_url: "http://127.0.0.1:44015"
+  cmci_user: "MDALBIN"
+  cmci_password: "password"
+  csd_group: "GENASAP"
+default_db2_sdsnload: "DBC0CFG.DB2.V12.SDSNLOAD"
+default_pkg_jobcard: "BINDPKG JOB 'WD-PKGBIND',MSGLEVEL=(1,1),MSGCLASS=R,NOTIFY=&SYSUID"
+default_plan_jobcard: "BINDPLA JOB 'WD-PLANBIND',MSGLEVEL=(1,1),MSGCLASS=R,NOTIFY=&SYSUID"
+default_db2_user: "{{ extra_vars.db2_user if extra_vars.db2_user is defined else 'GITLAB' }}"
+default_db2_action: "REPLACE"
+db2_sys_def:
+  package_maxrc: 4
+  plan_maxrc: 4
+  user: "{{ default_db2_user }}"
+  package: GENASWD
+  plan: GENAPWD
+  qualifier: GENAPPWD
+  subsys: DBC1
+  package_jobcard: "{{default_pkg_jobcard}}"
+  plan_jobcard: "{{default_plan_jobcard}}"
+  package_action: "{{default_db2_action}}"
+  plan_action: "{{default_db2_action}}"
+  sdsnload: "{{default_db2_sdsnload}}"
+  plan_pklist: "*.GENASWD.*"
+hlq: "{{ extra_vars.hlq if extra_vars.hlq is defined else 'WDEPLOY.GENAPP.ACCEPT' }}"
+uss_root: "{{ extra_vars.uss_root if extra_vars.uss_root is defined else '/tmp/wazi-deploy' }}"
+
+
+
+
+
+
+
+

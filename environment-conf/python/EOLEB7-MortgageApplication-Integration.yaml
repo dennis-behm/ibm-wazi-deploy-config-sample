@@ -1,0 +1,43 @@
+#*******************************************************************************
+# Licensed Materials - Property of IBM
+# (c) Copyright IBM Corp. 2023. All Rights Reserved.
+#
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# Contract with IBM Corp.
+#*******************************************************************************
+---
+apiVersion: deploy.ibm.com/v1
+kind: Environment
+metadata:
+  name: "EOLEB7-Integration"
+  version: 1.0.0
+
+# variables that can be overridden via extra vars
+hlq: "{{ extra_vars.hlq if extra_vars.hlq is defined else 'WDEPLOY.MORTGAGE.INT' }}"
+uss_root: "{{ extra_vars.uss_root if extra_vars.uss_root is defined else '/tmp/wazi-deploy' }}"
+deploy_cfg_home: "{{ extra_vars.deploy_cfg_home if extra_vars.deploy_cfg_home is defined else '/var/WaziDeploy/wazi-deploy-samples-0.10.0/wazi-deploy-sample/plum-samples/external-repos/' }}"
+
+# Application level settings
+# When defined they are overriding the default values
+
+# db2 bind settings
+# app_db2_user: "{{ extra_vars.db2_user if extra_vars.db2_user is defined else 'JENKINS' }}"
+
+app_db2_plan: "MORTGAGE"
+app_db2_package: "MORTGAGE"
+app_db2_qualifier: "MORTGAGE"
+app_db2_subsys: "DBC1"
+app_db2_plan_pklist: "*.MORTGAGE.*"
+
+# cics settings
+app_cics_context: "CICS01"
+app_cmci_user: "MDALBIN"
+app_cmci_password: "{{ extra_vars.app_cmci_password if extra_vars.app_cmci_password is defined else [] }}"
+app_csd_group: "EPSMTM"
+
+# centrally managed variables
+include_environment_vars:
+  files_list:
+     - "{{ deploy_cfg_home }}/deployment-method/global/environment-configuration/{{ metadata.name }}.yml"
+  files_must_exist: true

@@ -1,0 +1,7 @@
+
+# Generally files can use ASCII - perform automatic LF normalization
+*                     zos-working-tree-encoding=iso8859-1 git-encoding=iso8859-1 text=auto
+
+# Always need git control files in ASCII
+.gitattributes        working-tree-encoding=iso8859-1     git-encoding=iso8859-1 eol=lf
+.gitignore            working-tree-encoding=iso8859-1     git-encoding=iso8859-1 eol=lf

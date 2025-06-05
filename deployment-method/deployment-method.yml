@@ -1,0 +1,144 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/dennis-behm/wazi-deploy-schemas/refs/heads/main/v3.0.3.1/dep-method-schema.json
+
+---
+apiVersion: deploy.ibm.com/v1
+kind: DeploymentMethod
+metadata:
+  name: "CICS"
+  version: "1.0.0"
+  description: |
+    This deployment method can be use for the deployment of an CICS application.
+  annotations:
+    deployVersion: "1.0.0"
+    
+activities:
+
+  - name: CONFIG
+    description: |
+      Load the generic Wazi Deploy Configuration variables
+      Specific for the Python implementation
+    actions:
+    - name: READ CONFIGURATION
+      short_name: CONFIG
+      steps:
+      - name: INCLUDE ENVIRONMENT VARIABLES
+        short_name: INCLUDE_ENV_VARS
+        properties:
+        - key: template
+          value: include_vars
+        - key: var_include_vars
+          value: include_environment_vars
+      - name: INCLUDE MIDDLEWARE VARIABLES
+        short_name: INCLUDE_MIDDLEWARE_VARS
+        properties:
+        - key: template
+          value: include_vars
+        - key: var_include_vars
+          value: include_middleware_vars
+      - name: INCLUDE GLOBAL VARIABLES
+        short_name: INCLUDE_GLOBAL_VARS
+        properties:
+        - key: template
+          value: include_vars
+        - key: var_include_vars
+          value: include_common_vars
+          
+  - name: PACKAGE
+    description: |
+      This activity expands the package into the working directory
+    actions:
+        - name: PACKAGE
+          steps:
+          - name: PACKAGE
+    tags:
+    - package
+    
+  - name: DEPLOY_MODULES
+    description: |
+      This activity is deploys artifacts into the target PDS libraries
+    actions:
+        - name: ADD
+          description: |
+            This action is applicable when we add new artifacts.
+          states:
+             - UNDEFINED
+          properties:
+          - key: "my_action_prop"
+            value: "my_value"
+          steps:
+          - name: MEMBER_COPY
+            description: |
+              This step do the copy of artifacts into PDSs
+    types:
+      - name: 'DBRM'
+      - name: 'LOAD'
+      - name: 'CICSLOAD'
+      - name: 'MAPLOAD'
+      - name: 'JCL'
+    is_artifact: True
+    tags:
+    - deploy_modules
+
+  - name: VERIFICATION
+    description: |
+      This action block verifies that the deployed JCLs are correct.
+      It uses the JCL Expert to scan and validate them. This showcases 
+      how the conditional deployment 'loop' keyword can be used.
+    types: 
+     - name: "JCL"
+    actions:
+      - name: JCLEXPERT
+        description: |
+          Invoke JCL expert interface for a single member of a dataset
+        steps: 
+          - name: SCAN_JCL
+            is_artifact: True
+            types: 
+             - name: "JCL"
+            loop:
+             loop_query: current_plan_step.artifacts
+             loop_var: jcl_member
+            when:
+             - wd_query[[ length ( current_plan_step.artifacts) ]] != 0
+            properties:
+            - key: template
+              value: job_submit
+            - key: var_job_submit
+              value: jcl_expert_verification
+
+  - name: DB2
+    description: |
+      This activity is dedicated to DBRM bind modules
+    actions:
+        - name: UPDATE
+          description: |
+            This action is applicable when we update a DBRM modules
+          states:
+             - UNDEFINED
+          steps:
+          - name: DB2_BIND_PACKAGE
+          - name: DB2_BIND_PLAN
+    types:
+      - name: 'DBRM'
+    is_artifact: True
+    tags:
+    - db2
+        
+  - name: CICS
+    description: |
+       This activity is dedicated to CICS artifacts
+    actions:
+        - name: UPDATE
+          states:
+             - UNDEFINED
+          steps:
+          - name: PROG_UPDATE
+            properties:
+            - key: "template"
+              value: "cics_cmci_prog_update"
+    types:
+      - name: 'CICSLOAD'
+      - name: 'MAPLOAD'
+    is_artifact: True
+    tags:
+    - cics  

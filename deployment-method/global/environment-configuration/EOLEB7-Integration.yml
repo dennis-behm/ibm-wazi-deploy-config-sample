@@ -1,0 +1,42 @@
+#################################################################################
+# This contains the 
+# Environment specific settings according to the parent folder name
+#################################################################################
+
+# CICS
+default_cics_context: "CICS01"
+default_cmci_url: "http://127.0.0.1:1490"
+default_cics_cmci_action: "NEWCOPY"
+
+# Db2
+default_db2_sdsnload: "DBC0CFG.DB2.V12.SDSNLOAD"
+default_pkg_jobcard: "BINDPKG JOB 'WD-PKGBIND',MSGLEVEL=(1,1),MSGCLASS=R,NOTIFY=&SYSUID"
+default_plan_jobcard: "BINDPLA JOB 'WD-PLANBIND',MSGLEVEL=(1,1),MSGCLASS=R,NOTIFY=&SYSUID"
+default_db2_user: "JENKINS"
+
+default_db2_package: "DEFAULT"
+default_db2_plan: "DEFAULT"
+default_db2_qualifier: "QUAL"
+default_db2_subsys: "DBC1"
+
+default_db2_action: "REPLACE"
+
+
+#################################################################################
+# global configuration references
+#################################################################################
+
+# reference to middleware deployment configuration
+include_middleware_vars:
+  files_list:
+    - "{{ deploy_cfg_home }}/deployment-method/global/cics_config.yml"
+    - "{{ deploy_cfg_home }}/deployment-method/global/db2_config.yml"
+  files_must_exist: True
+
+# reference to global deployment configurations and capabilities
+include_common_vars:
+  files_list:
+    - "{{ deploy_cfg_home }}/deployment-method/global/jcl_verification.yml"
+    - "{{ deploy_cfg_home }}/deployment-method/global/pds_specification.yml"
+    - "{{ deploy_cfg_home }}/deployment-method/global/types_pattern_mapping.yml"
+  files_must_exist: True

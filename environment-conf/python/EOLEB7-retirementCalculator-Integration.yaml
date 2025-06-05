@@ -1,0 +1,48 @@
+#*******************************************************************************
+# Licensed Materials - Property of IBM
+# (c) Copyright IBM Corp. 2023. All Rights Reserved.
+#
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# Contract with IBM Corp.
+#*******************************************************************************
+---
+apiVersion: deploy.ibm.com/v1
+kind: Environment
+metadata:
+  name: "EOLEB7-Integration"
+  version: 1.0.0
+
+# variables that can be overridden via extra vars
+hlq: "{{ extra_vars.hlq if extra_vars.hlq is defined else 'WDEPLOY.RETCAL.INT' }}"
+uss_root: "{{ extra_vars.uss_root if extra_vars.uss_root is defined else '/tmp/wazi-deploy' }}"
+deploy_cfg_home: "{{ extra_vars.deploy_cfg_home if extra_vars.deploy_cfg_home is defined else '/var/WaziDeploy/wazi-deploy-samples-0.10.0/wazi-deploy-sample/plum-samples/external-repos/' }}"
+
+# Application level settings
+# When defined they are overriding the default values
+
+# retirement calculator does not have db2 or cics - values can be left undefined / or deleted
+
+# db2 bind settings
+
+app_db2_plan:
+app_db2_package:
+app_db2_qualifier:
+app_db2_subsys:
+
+# cics settings
+app_cics_context:
+app_cmci_user:
+app_cmci_password:
+app_csd_group:
+
+# jcl text substitutions
+app_jcl_text_subs_patterns:
+  - pattern: "@PGMLIB"
+    replace: "{{ hlq }}"
+
+# centrally managed variables
+include_environment_vars:
+  files_list:
+    - "{{ deploy_cfg_home }}/deployment-method/global/environment-configuration/{{ metadata.name }}.yml"
+  files_must_exist: true
